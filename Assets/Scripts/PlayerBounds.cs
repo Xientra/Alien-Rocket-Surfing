@@ -2,6 +2,9 @@
 
 public class PlayerBounds : MonoBehaviour {
 
+	[SerializeField]
+	private float boundsMultiplier = 0.9f;
+
 	public Vector3 cornerTopLeft;
 	public Vector3 cornerTopRight;
 	public Vector3 cornerBottomLeft;
@@ -10,20 +13,37 @@ public class PlayerBounds : MonoBehaviour {
 	public float scaleX;
 	public float scaleY;
 
-	public float boundX;
-	public float boundY;
+	public float left;
+	public float right;
+	public float top;
+	public float bottom;
 
-	private void OnDrawGizmos() {
-		scaleX = transform.localScale.x / 2;
-		scaleY = transform.localScale.y / 2;
+	private void Awake() {
+		UpdateValues();
+	}
 
-		//boundX = transform.position.x + 
+	private void Update() {
+		if (transform.hasChanged) {
+			UpdateValues();
+		}
+	}
+
+	private void UpdateValues() {
+		scaleX = (transform.localScale.x / 2) * boundsMultiplier;
+		scaleY = (transform.localScale.y / 2) * boundsMultiplier;
+
+		left = transform.position.x - scaleX;
+		right = transform.position.x + scaleX;
+		top = transform.position.y - scaleY;
+		bottom = transform.position.y + scaleY;
 
 		cornerTopLeft = transform.position + new Vector3(-scaleX, scaleY, 0);
 		cornerTopRight = transform.position + new Vector3(scaleX, scaleY, 0);
 		cornerBottomLeft = transform.position + new Vector3(-scaleX, -scaleY, 0);
 		cornerBottomRight = transform.position + new Vector3(scaleX, -scaleY, 0);
+	}
 
+	private void OnDrawGizmos() {
 		Gizmos.color = Color.red;
 		Gizmos.DrawLine(cornerTopLeft, cornerBottomLeft);
 		Gizmos.color = Color.red;

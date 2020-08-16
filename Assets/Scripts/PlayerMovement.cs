@@ -6,19 +6,30 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour {
 
 	[SerializeField]
-	private PlayerBounds playerBounds;
+	private GameObject gfx;
 
 	[SerializeField]
-	private float boundsMultiplier = 0.9f;
+	private PlayerBounds bounds;
 
 	[SerializeField]
 	private Vector2 speed = new Vector2(1, 1);
 
+	private Rigidbody2D rb;
+
+
+
 	private float horizontalInput;
 	private float verticalInput;
+	private float jumpInput;
 
-	private Rigidbody2D rb;
-	private Camera cam;
+	[SerializeField]
+	private float jumpAmplitude = 1;
+	[SerializeField]
+	private float jumpSpeed = 2;
+	private bool jumping = false;
+	private float jumpTime = 0;
+	private float originalY;
+
 
 
 	private void Awake() {
@@ -26,41 +37,63 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	private void Start() {
-		cam = Camera.main;
 	}
 
 	private void Update() {
 		horizontalInput = Input.GetAxis("Horizontal");
 		verticalInput = Input.GetAxis("Vertical");
-
+		if (Input.GetAxis("Jump") == 1 && jumping == false) {
+			jumpTime = 0;
+			jumping = true;
+			originalY = transform.position.y;
+		}
 	}
 
 	private void FixedUpdate() {
+		float xPos = transform.position.x;
+		float yPos = transform.position.y;
 
-		float xBounds = playerBounds.scaleX * boundsMultiplier;
-		float yBounds = playerBounds.scaleY * boundsMultiplier;
+		float speedX = jumping ? speed.x / 2 : speed.x;
 
-		float ySpeed = 0;
-		float xSpeed = 0;
+		// vertical movement
+		if (jumping == true) {
+			// jumping
+			gfx.transform.Rotate(gfx.transform.forward, -(360 / (Mathf.PI * jumpSpeed)) * Time.fixedDeltaTime);
+			yPos = originalY + JumpingCurve(jumpTime);
 
+			jumpTime += Time.fixedDeltaTime;
+
+			if (jumpTime >=  Mathf.PI * (jumpSpeed))
+				jumping = false;
+		}
+		else {
+			// ground movement
+			if (verticalInput < 0) {
+				if (transform.position.y > bounds.top)
+					yPos = transform.position.y + speed.y * verticalInput;
+			}
+			else if (verticalInput > 0) {
+				if (transform.position.y < bounds.bottom)
+					yPos = transform.position.y + speed.y * verticalInput;
+			}
+
+		}
+
+		// horizontal movement
 		if (horizontalInput < 0) {
-			if (transform.position.x > -xBounds)
-				xSpeed = speed.x * horizontalInput;
+			if (transform.position.x > bounds.left)
+				xPos = transform.position.x + speedX * horizontalInput;
 		}
 		else if (horizontalInput > 0) {
-			if (transform.position.x < xBounds)
-				xSpeed = speed.x * horizontalInput;
+			if (transform.position.x < bounds.right)
+				xPos = transform.position.x + speedX * horizontalInput;
 		}
 
-		if (verticalInput < 0) {
-			if (transform.position.y > -yBounds)
-				ySpeed = speed.y * verticalInput;
-		}
-		else if (verticalInput > 0) {
-			if (transform.position.y < yBounds)
-				ySpeed = speed.y * verticalInput;
-		}
+		// set next position
+		rb.MovePosition(new Vector3(xPos, yPos, 0));
+	}
 
-		rb.MovePosition(transform.position + new Vector3(xSpeed, ySpeed, 0));
+	private float JumpingCurve(float jumpingTime) {
+		return Mathf.Sin(jumpTime * (1 / jumpSpeed)) * jumpAmplitude;
 	}
 }
