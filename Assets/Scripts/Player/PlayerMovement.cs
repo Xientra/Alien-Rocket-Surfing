@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour {
 
 	private float horizontalInput;
 	private float verticalInput;
-	private float jumpInput;
+	private bool jumpInput;
 
 	[SerializeField]
 	private float jumpAmplitude = 1;
@@ -42,10 +42,9 @@ public class PlayerMovement : MonoBehaviour {
 	private void Update() {
 		horizontalInput = Input.GetAxis("Horizontal");
 		verticalInput = Input.GetAxis("Vertical");
-		if (Input.GetAxis("Jump") == 1 && jumping == false) {
-			jumpTime = 0;
-			jumping = true;
-			originalY = transform.position.y;
+		jumpInput = Input.GetAxis("Jump") != 0;
+		if (jumpInput && jumping == false) {
+			Jump();
 		}
 	}
 
@@ -58,7 +57,7 @@ public class PlayerMovement : MonoBehaviour {
 		// vertical movement
 		if (jumping == true) {
 			// jumping
-			gfx.transform.Rotate(gfx.transform.forward, -(360 / (Mathf.PI * jumpSpeed)) * Time.fixedDeltaTime);
+			//gfx.transform.Rotate(gfx.transform.forward, -(360 / (Mathf.PI * jumpSpeed)) * Time.fixedDeltaTime);
 			yPos = originalY + JumpingCurve(jumpTime);
 
 			jumpTime += Time.fixedDeltaTime;
@@ -69,31 +68,48 @@ public class PlayerMovement : MonoBehaviour {
 		else {
 			// ground movement
 			if (verticalInput < 0) {
-				if (transform.position.y > bounds.top)
-					yPos = transform.position.y + speed.y * verticalInput;
+				yPos = transform.position.y + speed.y * verticalInput;
+				if (yPos < bounds.top)
+					yPos = bounds.top;
 			}
 			else if (verticalInput > 0) {
-				if (transform.position.y < bounds.bottom)
-					yPos = transform.position.y + speed.y * verticalInput;
+				yPos = transform.position.y + speed.y * verticalInput;
+				if (yPos > bounds.bottom)
+					yPos = bounds.bottom;
 			}
-
 		}
 
 		// horizontal movement
 		if (horizontalInput < 0) {
-			if (transform.position.x > bounds.left)
-				xPos = transform.position.x + speedX * horizontalInput;
+			xPos = transform.position.x + speedX * horizontalInput;
+			if (xPos < bounds.left)
+				xPos = bounds.left;
 		}
 		else if (horizontalInput > 0) {
-			if (transform.position.x < bounds.right)
-				xPos = transform.position.x + speedX * horizontalInput;
+			xPos = transform.position.x + speedX * horizontalInput;
+			if (xPos > bounds.right)
+				xPos = bounds.right;
 		}
 
 		// set next position
 		rb.MovePosition(new Vector3(xPos, yPos, 0));
 	}
 
+	public void Jump() {
+		jumpTime = 0;
+		jumping = true;
+		originalY = transform.position.y;
+	}
+
 	private float JumpingCurve(float jumpingTime) {
 		return Mathf.Sin(jumpTime * (1 / jumpSpeed)) * jumpAmplitude;
+	}
+
+	private void OnTriggerStay2D(Collider2D collision) {
+		if (collision.CompareTag("ParryCollider")) {
+			if (jumpInput) {
+				Jump();
+			}
+		}
 	}
 }
