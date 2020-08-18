@@ -13,6 +13,9 @@ public class PlayerBounds : MonoBehaviour {
 	public float scaleX;
 	public float scaleY;
 
+
+	public float height;
+
 	public float left;
 	public float right;
 	public float top;
@@ -31,6 +34,8 @@ public class PlayerBounds : MonoBehaviour {
 	private void UpdateValues() {
 		scaleX = (transform.localScale.x / 2) * boundsMultiplier;
 		scaleY = (transform.localScale.y / 2) * boundsMultiplier;
+
+		height = transform.position.y;
 
 		left = transform.position.x - scaleX;
 		right = transform.position.x + scaleX;
@@ -52,6 +57,9 @@ public class PlayerBounds : MonoBehaviour {
 		Gizmos.DrawLine(cornerTopLeft, cornerTopRight);
 		Gizmos.color = Color.red;
 		Gizmos.DrawLine(cornerBottomLeft, cornerBottomRight);
+
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawLine(transform.position + new Vector3(scaleX, 0, 0), transform.position + new Vector3(-scaleX, 0, 0));
 	}
 
 	//private void OnValidate() {

@@ -11,15 +11,26 @@ public class PlayerMovement : MonoBehaviour {
 	[SerializeField]
 	private PlayerBounds bounds;
 
-	[SerializeField]
-	private Vector2 speed = new Vector2(1, 1);
-
 	private Rigidbody2D rb;
 
 
 
+
+	[SerializeField]
+	private Vector2 speed = new Vector2(1, 1);
+	[Tooltip("In angle per second")]
+	[SerializeField]
+	private float rotationSpeed = 3f;
+
+	[SerializeField]
+	private float gravity = -1;
+
+	private bool grounded = false;
+
+
 	private float horizontalInput;
 	private float verticalInput;
+	private float rotationInput;
 	private bool jumpInput;
 
 	[SerializeField]
@@ -42,8 +53,10 @@ public class PlayerMovement : MonoBehaviour {
 	private void Update() {
 		horizontalInput = Input.GetAxis("Horizontal");
 		verticalInput = Input.GetAxis("Vertical");
+		rotationInput = Input.GetAxisRaw("Rotation");
+		Debug.Log(rotationInput);
 		jumpInput = Input.GetAxis("Jump") != 0;
-		if (jumpInput && jumping == false) {
+		if (jumpInput && jumping == false && grounded == true) {
 			Jump();
 		}
 	}
@@ -52,32 +65,26 @@ public class PlayerMovement : MonoBehaviour {
 		float xPos = transform.position.x;
 		float yPos = transform.position.y;
 
-		float speedX = jumping ? speed.x / 2 : speed.x;
+		float speedX = !grounded ? speed.x / 2 : speed.x;
 
 		// vertical movement
 		if (jumping == true) {
 			// jumping
-			//gfx.transform.Rotate(gfx.transform.forward, -(360 / (Mathf.PI * jumpSpeed)) * Time.fixedDeltaTime);
-			yPos = originalY + JumpingCurve(jumpTime);
+			yPos += JumpingCurve(jumpTime);
 
 			jumpTime += Time.fixedDeltaTime;
 
-			if (jumpTime >=  Mathf.PI * (jumpSpeed))
+			if (jumpTime >= Mathf.PI * jumpSpeed || grounded == true)
 				jumping = false;
 		}
-		else {
-			// ground movement
-			if (verticalInput < 0) {
-				yPos = transform.position.y + speed.y * verticalInput;
-				if (yPos < bounds.top)
-					yPos = bounds.top;
-			}
-			else if (verticalInput > 0) {
-				yPos = transform.position.y + speed.y * verticalInput;
-				if (yPos > bounds.bottom)
-					yPos = bounds.bottom;
-			}
+
+		// gravity
+		yPos -= gravity;
+		if (yPos <= bounds.height) {
+			yPos = bounds.height;
+			grounded = true;
 		}
+
 
 		// horizontal movement
 		if (horizontalInput < 0) {
@@ -91,6 +98,9 @@ public class PlayerMovement : MonoBehaviour {
 				xPos = bounds.right;
 		}
 
+		// rotation
+		transform.Rotate(gfx.transform.forward, rotationInput * rotationSpeed * Time.fixedDeltaTime);
+
 		// set next position
 		rb.MovePosition(new Vector3(xPos, yPos, 0));
 	}
@@ -99,10 +109,11 @@ public class PlayerMovement : MonoBehaviour {
 		jumpTime = 0;
 		jumping = true;
 		originalY = transform.position.y;
+		grounded = false;
 	}
 
 	private float JumpingCurve(float jumpingTime) {
-		return Mathf.Sin(jumpTime * (1 / jumpSpeed)) * jumpAmplitude;
+		return (Mathf.Cos(jumpTime * (1 / jumpSpeed)) + 1) * jumpAmplitude;
 	}
 
 	private void OnTriggerStay2D(Collider2D collision) {
