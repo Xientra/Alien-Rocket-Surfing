@@ -15705,6 +15705,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 0.5
   points: []
+  showNormals: 0
 --- !u!1 &1473784226
 GameObject:
   m_ObjectHideFlags: 0
@@ -15756,8 +15757,8 @@ MonoBehaviour:
   bounds: {fileID: 1741998452}
   speed: {x: 0.5, y: 0.3}
   rotationSpeed: 360
-  gravity: 0.5
-  rocketStrength: 0.4
+  gravity: 0.1
+  rocketStrength: 0.099
   canJump: 0
   jumpAmplitude: 0.5
   jumpSpeed: 0.3
@@ -15838,17 +15839,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boundsMultiplier: 0.9
-  cornerTopLeft: {x: -8.888889, y: -3, z: 0}
-  cornerTopRight: {x: 8.888889, y: -3, z: 0}
-  cornerBottomLeft: {x: -8.888889, y: -5, z: 0}
-  cornerBottomRight: {x: 8.888889, y: -5, z: 0}
   scaleX: 8.888889
   scaleY: 1
   height: 0
   left: 0
   right: 0
-  top: 3
-  bottom: 5
 --- !u!4 &1741998453
 Transform:
   m_ObjectHideFlags: 0
@@ -20710,6 +20705,7 @@ MonoBehaviour:
   - {x: -8.7, y: -5, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 2.9, y: -5, z: 0}
+  showNormals: 0
 --- !u!4 &2070630783
 Transform:
   m_ObjectHideFlags: 0
@@ -20788,6 +20784,7 @@ MonoBehaviour:
   - {x: -3.38, y: 1.62, z: 0}
   - {x: -1.32, y: 2.36, z: 0}
   - {x: 2.72, y: 0.38, z: 0}
+  showNormals: 0
 --- !u!61 &2116718049
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -20822,7 +20819,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2116718047}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 24.73, y: 0.73, z: 0}
+  m_LocalPosition: {x: 5.94, y: 0.73, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 881906250}

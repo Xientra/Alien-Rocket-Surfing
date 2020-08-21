@@ -29,6 +29,8 @@ public class PlayerMovement : MonoBehaviour {
 	[SerializeField]
 	private float rotationSpeed = 3f;
 
+	private float ySpeed = 0;
+
 	[Header("Vertical:")]
 
 	[SerializeField]
@@ -55,7 +57,7 @@ public class PlayerMovement : MonoBehaviour {
 	// ground variables
 	private Obstacle collidingObs = null;
 	private float groundHeight;
-	private float groundRotation;
+	private Vector3 groundRotation;
 
 
 	private void Awake() {
@@ -83,7 +85,7 @@ public class PlayerMovement : MonoBehaviour {
 
 		// jumping
 		if (jumping == true) {
-			newPos.y += JumpingCurve(jumpTime);
+			ySpeed += JumpingCurve(jumpTime);
 
 			jumpTime += Time.fixedDeltaTime;
 
@@ -92,21 +94,26 @@ public class PlayerMovement : MonoBehaviour {
 		}
 
 		// gravity
-		newPos.y -= gravity;
+		ySpeed -= gravity;
 
 		// ground collision
 		groundHeight = bounds.height;
+		groundRotation = Vector3.up;
 		if (collidingObs != null && collidingObs.InBounds(transform.position.x)) {
-			float obsHeight = collidingObs.Evaluate(transform.position.x);
-			if (obsHeight > groundHeight)
-				groundHeight = obsHeight;
+
+			Obstacle.PointEvaluation obsGroundValues = collidingObs.Evaluate(transform.position.x);
+			if (obsGroundValues.height > groundHeight) {
+				groundHeight = obsGroundValues.height;
+				groundRotation = obsGroundValues.normal;
+			}
 		}
 
-		if (newPos.y <= groundHeight) {
-			newPos.y = groundHeight;
-			grounded = true;
-		}
 
+		// rocket thrust
+		ySpeed += (transform.right * rocketStrength).y;
+
+		// vertical movement
+		newPos.y += ySpeed;
 
 		// horizontal movement
 		if (horizontalInput < 0)
@@ -115,17 +122,21 @@ public class PlayerMovement : MonoBehaviour {
 			newPos.x = transform.position.x + speedX * horizontalInput;
 
 		// rotation
-		transform.Rotate(gfx.transform.forward, rotationInput * rotationSpeed * Time.fixedDeltaTime);
-
-		// rocket thrust
-		newPos.y += (transform.right * rocketStrength).y;
-
+		//transform.Rotate(gfx.transform.forward, rotationInput * rotationSpeed * Time.fixedDeltaTime);
+		transform.up = groundRotation;
 
 		// horizontal bounds
 		if (newPos.x < bounds.left)
 			newPos.x = bounds.left;
 		if (newPos.x > bounds.right)
 			newPos.x = bounds.right;
+
+		// vertical bounds
+		if (newPos.y <= groundHeight) {
+			newPos.y = groundHeight;
+			grounded = true;
+			ySpeed = 0;
+		}
 
 
 		// set next position
