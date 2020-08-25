@@ -140,7 +140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &55929800
 Transform:
   m_ObjectHideFlags: 0
@@ -15721,7 +15721,7 @@ GameObject:
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -15732,15 +15732,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1473784226}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.441, y: -4, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0.6086309, w: 0.7934536}
+  m_LocalPosition: {x: -6.441, y: -0.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 55929800}
   - {fileID: 892167777}
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -74.981}
 --- !u!114 &1473784228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15755,13 +15755,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gfx: {fileID: 892167776}
   bounds: {fileID: 1741998452}
+  boardSize: 1
+  rotDEBUG: 0
   speed: {x: 0.5, y: 0.3}
   rotationSpeed: 360
-  gravity: 0.1
-  rocketStrength: 0.099
-  canJump: 0
-  jumpAmplitude: 0.5
-  jumpSpeed: 0.3
+  rotationCorrectionSpeed: 0.5
+  gravity: 0.01
+  rocketStrength: 0
+  canJump: 1
+  jumpAmplitude: 0.1
+  jumpSpeed: 0.1
 --- !u!50 &1473784229
 Rigidbody2D:
   serializedVersion: 4
@@ -15839,6 +15842,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boundsMultiplier: 0.9
+  drawGizmos: 0
   scaleX: 8.888889
   scaleY: 1
   height: 0
@@ -20764,7 +20768,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2116718048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20784,7 +20788,7 @@ MonoBehaviour:
   - {x: -3.38, y: 1.62, z: 0}
   - {x: -1.32, y: 2.36, z: 0}
   - {x: 2.72, y: 0.38, z: 0}
-  showNormals: 0
+  showNormals: 1
 --- !u!61 &2116718049
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -20819,7 +20823,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2116718047}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.94, y: 0.73, z: 0}
+  m_LocalPosition: {x: 9.86, y: 0.73, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 881906250}

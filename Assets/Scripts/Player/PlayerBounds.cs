@@ -5,6 +5,8 @@ public class PlayerBounds : MonoBehaviour {
 	[SerializeField]
 	private float boundsMultiplier = 0.9f;
 
+	public bool drawGizmos;
+
 	public float scaleX;
 	public float scaleY;
 
@@ -34,7 +36,10 @@ public class PlayerBounds : MonoBehaviour {
 	}
 
 	private void OnDrawGizmos() {
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawLine(transform.position + new Vector3(scaleX, 0, 0), transform.position + new Vector3(-scaleX, 0, 0));
+		if (drawGizmos) {
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawLine(transform.position + new Vector3(scaleX, 0, 0), transform.position + new Vector3(-scaleX, 0, 0));
+
+		}
 	}
 }
