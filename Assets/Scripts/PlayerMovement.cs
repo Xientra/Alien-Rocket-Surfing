@@ -5,13 +5,14 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
 public class PlayerMovement : MonoBehaviour {
 
 	[SerializeField]
 	private GameObject gfx;
 
 	[SerializeField]
-	private PlayerBounds bounds;
+	private Bounds bounds;
 
 	private Rigidbody2D rb;
 
@@ -68,6 +69,12 @@ public class PlayerMovement : MonoBehaviour {
 	private Vector3 groundRotation;
 
 
+
+	// Obstacles
+	// ---------
+
+	private float additionalBoost = 0;
+
 	private void Awake() {
 		rb = GetComponent<Rigidbody2D>();
 	}
@@ -90,14 +97,6 @@ public class PlayerMovement : MonoBehaviour {
 		Gizmos.DrawLine(transform.position - transform.right * boardSize, transform.position + transform.right * boardSize);
 	}
 
-	private void OnTriggerStay2D(Collider2D collision) {
-		if (collision.CompareTag("ParryCollider")) {
-			if (jumpInput) {
-				Jump();
-			}
-		}
-	}
-
 	private void OnTriggerEnter2D(Collider2D collision) {
 		Obstacle obs = collision.GetComponent<Obstacle>();
 		if (obs != null)
@@ -113,17 +112,20 @@ public class PlayerMovement : MonoBehaviour {
 
 	private void FixedUpdate() {
 
-
-		//Vector3 rotation = 
-
+		// calculate next position
 		Vector3 newPos = Move();
 
 		// set next position
 		rb.MovePosition(new Vector3(newPos.x, newPos.y, 0));
 
-		float rotation = InvoluntaryRotation(newPos);
+		// calulcate rotation
+		//float rotation = InvoluntaryRotation(newPos);
+		float rotation = rb.rotation + rotationInput * rotationSpeed * Time.fixedDeltaTime;
 
+		// set rotation
 		rb.MoveRotation(rotation);
+
+
 
 		rotDEBUG = rb.rotation;
 	}
@@ -146,6 +148,16 @@ public class PlayerMovement : MonoBehaviour {
 				jumping = false;
 		}
 
+		// rocket thrust
+		if (ySpeed < 0)
+			ySpeed += (transform.right * rocketStrength).y;
+
+		if (additionalBoost != 0) {
+			ySpeed += additionalBoost;
+			additionalBoost = 0;
+			Debug.Log("boosted");
+		}
+
 		// gravity
 		ySpeed -= gravity;
 
@@ -160,10 +172,6 @@ public class PlayerMovement : MonoBehaviour {
 				groundRotation = obsGroundValues.normal;
 			}
 		}
-
-
-		// rocket thrust
-		ySpeed += (transform.right * rocketStrength).y;
 
 		// vertical movement
 		newPos.y += ySpeed;
@@ -247,5 +255,9 @@ public class PlayerMovement : MonoBehaviour {
 
 	private float JumpingCurve(float jumpingTime) {
 		return (Mathf.Cos(jumpTime * (1 / jumpSpeed)) + 1) * jumpAmplitude;
+	}
+
+	public void AddRocketBoost(float boost) {
+		additionalBoost = (transform.right * boost).y;
 	}
 }

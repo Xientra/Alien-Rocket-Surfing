@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerBounds : MonoBehaviour {
+public class Bounds : MonoBehaviour {
 
 	[SerializeField]
 	private float boundsMultiplier = 0.9f;
@@ -25,7 +25,7 @@ public class PlayerBounds : MonoBehaviour {
 		}
 	}
 
-	private void UpdateValues() {
+	public void UpdateValues() {
 		scaleX = (transform.localScale.x / 2) * boundsMultiplier;
 		scaleY = (transform.localScale.y / 2) * boundsMultiplier;
 
@@ -41,5 +41,9 @@ public class PlayerBounds : MonoBehaviour {
 			Gizmos.DrawLine(transform.position + new Vector3(scaleX, 0, 0), transform.position + new Vector3(-scaleX, 0, 0));
 
 		}
+	}
+
+	private void OnValidate() {
+		UpdateValues();
 	}
 }
