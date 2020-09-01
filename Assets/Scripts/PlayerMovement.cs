@@ -1,18 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
 public class PlayerMovement : MonoBehaviour {
+
+#pragma warning disable 0649
 
 	[SerializeField]
 	private GameObject gfx;
 
 	[SerializeField]
 	private Bounds bounds;
+
+#pragma warning restore 0649
+
 
 	private Rigidbody2D rb;
 
@@ -29,38 +32,52 @@ public class PlayerMovement : MonoBehaviour {
 
 	public float rotDEBUG;
 
-	[Header("Movement:")]
+	[Header("Speed:")]
 	[SerializeField]
-	private Vector2 speed = new Vector2(1, 1);
-	[Tooltip("In angle per second")]
-	[SerializeField]
-	private float rotationSpeed = 3f;
-	[SerializeField]
-	private float rotationCorrectionSpeed = 0.5f;
+	private float constantSpeed = 1f;
 
-	private float ySpeed = 0;
+
+	[Header("Movement:")]
+
+	[Tooltip("How fast the player moves with the keyboard inputs.")]
+	[SerializeField]
+	private Vector2 keyMoveSpeed = new Vector2(1, 1);
+
+	[Tooltip("The accelerations that currently apply on the rigitbody.")]
+	public Vector3 acceleration = Vector3.zero;
+
+	[Tooltip("The transformation the rigitbody made last physics interval.")]
+	public Vector3 velocity = Vector2.zero;
 
 	[Header("Vertical:")]
 
 	[SerializeField]
 	private float gravity = -1;
 
-
 	[SerializeField]
 	private float rocketStrength = 2f;
 
+
 	[Header("Jumping:")]
 	public bool canJump = true;
-
 	private bool grounded = false;
+	private bool jumping = false;
 
 	[SerializeField]
 	private float jumpAmplitude = 1;
 	[SerializeField]
 	private float jumpSpeed = 2;
-	private bool jumping = false;
 	private float jumpTime = 0;
 
+
+
+	[Header("Rotation")]
+
+	[SerializeField]
+	private float rotationSpeed = 3f;
+
+	[SerializeField]
+	private float rotationCorrectionSpeed = 0.5f;
 
 
 	// ground variables
@@ -73,7 +90,7 @@ public class PlayerMovement : MonoBehaviour {
 	// Obstacles
 	// ---------
 
-	private float additionalBoost = 0;
+	private Vector2 additionalBoost = Vector2.zero;
 
 	private void Awake() {
 		rb = GetComponent<Rigidbody2D>();
@@ -83,6 +100,10 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	private void Update() {
+		GetInput();
+	}
+
+	private void GetInput() {
 		horizontalInput = Input.GetAxis("Horizontal");
 		verticalInput = Input.GetAxis("Vertical");
 		rotationInput = Input.GetAxisRaw("Rotation");
@@ -136,11 +157,11 @@ public class PlayerMovement : MonoBehaviour {
 	private Vector3 Move() {
 		Vector3 newPos = transform.position;
 
-		float speedX = !grounded ? speed.x / 2 : speed.x;
+		// -------------- vertical movement -------------- //
 
 		// jumping
 		if (jumping == true) {
-			ySpeed += JumpingCurve(jumpTime);
+			acceleration.y += JumpingCurve(jumpTime);
 
 			jumpTime += Time.fixedDeltaTime;
 
@@ -149,19 +170,45 @@ public class PlayerMovement : MonoBehaviour {
 		}
 
 		// rocket thrust
-		if (ySpeed < 0)
-			ySpeed += (transform.right * rocketStrength).y;
-
-		if (additionalBoost != 0) {
-			ySpeed += additionalBoost;
-			additionalBoost = 0;
-			Debug.Log("boosted");
-		}
+		if (acceleration.y < 0)
+			acceleration.y += (transform.right * rocketStrength).y;
 
 		// gravity
-		ySpeed -= gravity;
+		acceleration.y -= gravity;
 
-		// ground collision
+
+
+		// -------------- horizontal movement -------------- //
+
+		// constant speed
+		//newPos.x += constantSpeed;
+
+		// input movement
+		if (horizontalInput < 0)
+			newPos.x = transform.position.x + keyMoveSpeed.x * horizontalInput;
+		else if (horizontalInput > 0)
+			newPos.x = transform.position.x + keyMoveSpeed.x * horizontalInput;
+
+		// -------------- addtional movement -------------- //
+
+		if (additionalBoost.sqrMagnitude != 0) {
+			acceleration.y += additionalBoost.y;
+			acceleration.x += additionalBoost.x;
+			additionalBoost.y = 0;
+		}
+
+		// -------------- bounds -------------- //
+
+		/*
+		// horizontal bounds
+		if (newPos.x < bounds.left)
+			newPos.x = bounds.left;
+		if (newPos.x > bounds.right)
+			newPos.x = bounds.right;
+		*/
+
+
+		// vertical bounds
 		groundHeight = bounds.height;
 		groundRotation = Vector3.up;
 		if (collidingObs != null && collidingObs.InBounds(transform.position.x)) {
@@ -173,30 +220,20 @@ public class PlayerMovement : MonoBehaviour {
 			}
 		}
 
-		// vertical movement
-		newPos.y += ySpeed;
-
-		// horizontal movement
-		if (horizontalInput < 0)
-			newPos.x = transform.position.x + speedX * horizontalInput;
-		else if (horizontalInput > 0)
-			newPos.x = transform.position.x + speedX * horizontalInput;
-
-
-		// horizontal bounds
-		if (newPos.x < bounds.left)
-			newPos.x = bounds.left;
-		if (newPos.x > bounds.right)
-			newPos.x = bounds.right;
-
-
-		// vertical bounds
 		if (newPos.y <= groundHeight) {
 			newPos.y = groundHeight;
 			grounded = true;
-			ySpeed = 0;
+			acceleration.y = 0;
 		}
 
+
+
+		// vertical movement
+		newPos.y += acceleration.y;
+
+
+
+		velocity = newPos - transform.position;
 		return newPos;
 	}
 
@@ -244,7 +281,7 @@ public class PlayerMovement : MonoBehaviour {
 
 		return 0;
 	}
-	
+
 	public void Jump() {
 		if (canJump) {
 			jumpTime = 0;
@@ -258,6 +295,6 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	public void AddRocketBoost(float boost) {
-		additionalBoost = (transform.right * boost).y;
+		additionalBoost = transform.right * boost;
 	}
 }
