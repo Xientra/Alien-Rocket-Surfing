@@ -111,13 +111,16 @@ public class PlayerMovement : MonoBehaviour {
 		Vector3 newPos = transform.position;
 
 
-		// -------------- input horizontal movement -------------- //
+		// -------------- horizontal movement -------------- //
+
+		// constant movement
+		newPos.x += constantSpeed;
 
 		// input movement
 		if (horizontalInput < 0)
-			newPos.x = transform.position.x + inputMoveSpeed * horizontalInput;
+			newPos.x = newPos.x + inputMoveSpeed * horizontalInput;
 		else if (horizontalInput > 0)
-			newPos.x = transform.position.x + inputMoveSpeed * horizontalInput;
+			newPos.x = newPos.x + inputMoveSpeed * horizontalInput;
 
 
 		// -------------- accerleration -------------- //

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Bounds))]
+//[CustomEditor(typeof(Bounds))]
 public class BoundsEditor : Editor {
 	public override void OnInspectorGUI() {
 		Bounds bounds = (Bounds)target;
